@@ -15,15 +15,20 @@ public class ChatController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    @MessageMapping("/message") // app/message topic for user to send
-    @SendTo("/chatroom/public") // to receive a message listen to this
+    // app/public-message for public chatroom msg mapping
+    @MessageMapping("/public-message")
+    @SendTo("/chatroom/public") // whenever user wants to receive a message from public room, they need to listen to this url
     public Message receiveMessage(@Payload Message message){
+    	System.out.println(message.toString());
         return message;
     }
 
-    @MessageMapping("/private-message") //private message to user
+    // app/private-message, for private message to user
+    @MessageMapping("/private-message")
     public Message recMessage(@Payload Message message){
-        simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message); //dynamic topics creation for sending it to user    // /user/Uttam/private
+    	//not using @SendTo a static uri!! So, using SimpMsgTemplate for sending it to unique(dynamic) topic for each user
+    	// so basically, creating topic on the fly.. /user/Uttam/private-message
+        simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private-message",message); 
         System.out.println(message.toString());
         return message;
     }
